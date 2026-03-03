@@ -1,7 +1,7 @@
 [project]
 name = "docfusion"
 version = "1.0.0"
-description = "DocFusion: Operation Intelligent Documents - rihal CodeStacker 2026 ML Challenge"
+description = "DocFusion: Operation Intelligent Documents - Rihal CodeStacker 2026 ML Challenge"
 requires-python = ">=3.13"
 authors = [{ name = "0xabdulraheem" }]
 
