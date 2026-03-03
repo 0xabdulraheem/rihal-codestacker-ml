@@ -134,9 +134,20 @@ if uploaded_file is not None:
             
             with st.spinner("Running OCR..."):
                 ocr_engine = load_ocr_engine()
-                ocr_results = ocr_engine.extract_text(tmp_path)
+                ocr_img = img_array
+                if len(ocr_img.shape) == 2:
+                    pass
+                elif ocr_img.shape[2] == 4:
+                    ocr_img = cv2.cvtColor(ocr_img, cv2.COLOR_RGBA2RGB)
+                ocr_results_raw = ocr_engine.reader.readtext(ocr_img)
+                ocr_results = []
+                for bbox, text, conf in ocr_results_raw:
+                    ocr_results.append({
+                        "text": text.strip(),
+                        "confidence": float(conf),
+                        "bbox": bbox,
+                    })
 
-            display_img = img_array.copy()
             if show_bboxes and ocr_results:
                 from PIL import ImageDraw as PilDraw
                 draw_img = pil_img.copy()
