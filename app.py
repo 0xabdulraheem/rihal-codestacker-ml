@@ -22,7 +22,7 @@ from src.ocr import OCREngine
 from src.preprocessing import error_level_analysis, load_image
 
 st.set_page_config(
-    page_title="DocFusion — Intelligent Document Analysis",
+    page_title="DocFusion",
     page_icon="D",
     layout="wide",
     initial_sidebar_state="expanded",

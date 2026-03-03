@@ -17,9 +17,10 @@ DATE_PATTERNS = [
 ]
 
 TOTAL_PATTERNS = [
-    r"(?:total|grand\s*total|amount\s*due|balance\s*due|net\s*total|total\s*amount|sum|payment)\s*[:\s]*[\$£€RM]?\s*(\d+[.,]\d{2})\b",
-    r"(?:total|grand\s*total|amount\s*due|balance\s*due)\s*[:\s]*[\$£€RM]?\s*(\d+)\b",
-    r"[\$£€RM]\s*(\d+[.,]\d{2})\b",
+    r"(?:total\s*rounded|grand\s*total|total\s*sales?\s*\(inclusive[^)]*\)|amount\s*due|balance\s*due|net\s*total|total\s*amount)\s*[:\s]*(?:RM|USD|\$|£|€)?\s*(\d+[.,]\d{2})\b",
+    r"(?:total)\s*[:\s]*(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})\b",
+    r"(?:total|grand\s*total|amount\s*due|balance\s*due)\s*[:\s]*(?:RM|USD|\$|£|€)?\s*(\d+[.,]\d{2})\b",
+    r"(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})\b",
     r"\b(\d+[.,]\d{2})\s*(?:total|due|paid)\b",
 ]
 
@@ -42,10 +43,14 @@ def normalize_date(raw: str) -> str | None:
         "%b %d %Y", "%B %d %Y",
         "%d%b%Y",
         "%Y%m%d",
+        "%d-%m-%y", "%d/%m/%y", "%d.%m.%y",
+        "%m-%d-%y", "%m/%d/%y",
     ]
     for fmt in formats:
         try:
             dt = datetime.strptime(raw, fmt)
+            if dt.year < 100:
+                dt = dt.replace(year=dt.year + 2000)
             if 2000 <= dt.year <= 2030:
                 return dt.strftime("%Y-%m-%d")
         except ValueError:
@@ -78,8 +83,10 @@ def extract_total(text: str) -> str | None:
                 continue
 
     if candidates:
-        candidates.sort(key=lambda x: x[0])
-        return candidates[0][1]
+        best_priority = min(c[0] for c in candidates)
+        top_candidates = [c for c in candidates if c[0] == best_priority]
+        top_candidates.sort(key=lambda x: float(x[1]), reverse=True)
+        return top_candidates[0][1]
 
     all_amounts = re.findall(r"\b(\d+[.,]\d{2})\b", text)
     if all_amounts:

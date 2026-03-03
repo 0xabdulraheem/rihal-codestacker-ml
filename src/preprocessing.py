@@ -72,12 +72,18 @@ def preprocess_for_ocr(img: np.ndarray) -> np.ndarray:
 
 
 def error_level_analysis(img: np.ndarray, quality: int = 90) -> np.ndarray:
-    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     import io
+
+    if len(img.shape) == 2:
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    elif img.shape[2] == 4:
+        img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
+
+    pil_img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
     buffer = io.BytesIO()
     pil_img.save(buffer, format="JPEG", quality=quality)
     buffer.seek(0)
-    compressed = np.array(Image.open(buffer))
+    compressed = np.array(Image.open(buffer).convert("RGB"))
     compressed = cv2.cvtColor(compressed, cv2.COLOR_RGB2BGR)
 
     h_orig, w_orig = img.shape[:2]
