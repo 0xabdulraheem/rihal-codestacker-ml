@@ -35,7 +35,6 @@ class DocFusionSolution:
 
         features_list: list[dict] = []
         labels: list[int] = []
-        extraction_cache: list[dict] = []
 
         for rec in records:
             image_path = os.path.join(train_dir, rec.get("image_path", ""))
@@ -59,24 +58,9 @@ class DocFusionSolution:
             label_info = rec.get("label", {})
             labels.append(int(label_info.get("is_forged", 0)))
 
-            extraction_cache.append({
-                "id": rec["id"],
-                "ocr_text": ocr_text,
-                "fields": gt_fields,
-            })
-
         detector = AnomalyDetector()
-        if len(set(labels)) >= 2:
-            detector.train(features_list, labels)
-        else:
-            detector.train(features_list, labels)
-
+        detector.train(features_list, labels)
         detector.save(model_dir)
-
-        cache_path = os.path.join(model_dir, "train_cache.jsonl")
-        with open(cache_path, "w") as f:
-            for item in extraction_cache:
-                f.write(json.dumps(item, default=str) + "\n")
 
         return model_dir
 
