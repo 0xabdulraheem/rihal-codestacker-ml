@@ -23,13 +23,14 @@ from src.preprocessing import error_level_analysis, load_image
 
 st.set_page_config(
     page_title="DocFusion — Intelligent Document Analysis",
-    page_icon="🔍",
+    page_icon="D",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 st.markdown("""
 <style>
+    [data-testid="stDeployButton"] { display: none; }
     .main-header {
         font-size: 2.2rem;
         font-weight: 700;
@@ -102,7 +103,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### About")
     st.markdown("**DocFusion** analyzes scanned receipts to extract structured data and detect potential forgeries using OCR + ML.")
-    st.markdown("Built for **rihal CodeStacker 2026**")
+    st.markdown("Built for **Rihal CodeStacker 2026**")
 
 st.markdown('<div class="main-header">DocFusion</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-header">Intelligent Document Analysis & Forgery Detection</div>', unsafe_allow_html=True)
@@ -161,13 +162,16 @@ if uploaded_file is not None:
         with col_results:
             st.markdown("#### Extracted Fields")
             
-            lines = []
+            all_lines = []
+            display_lines = []
             for r in sorted(ocr_results, key=lambda x: min(p[1] for p in x["bbox"])):
+                all_lines.append(r["text"])
                 if r["confidence"] >= confidence_threshold:
-                    lines.append(r["text"])
-            ocr_text = "\n".join(lines)
+                    display_lines.append(r["text"])
+            full_ocr_text = "\n".join(all_lines)
+            ocr_text = "\n".join(display_lines)
 
-            fields = extract_fields(ocr_text, ocr_results)
+            fields = extract_fields(full_ocr_text, ocr_results)
 
             vendor = fields.get("vendor") or "Not detected"
             date = fields.get("date") or "Not detected"
@@ -182,7 +186,7 @@ if uploaded_file is not None:
             st.markdown("#### Forgery Analysis")
 
             detector, detector_loaded = load_detector()
-            feat = build_feature_vector(tmp_path, fields, ocr_text)
+            feat = build_feature_vector(tmp_path, fields, full_ocr_text)
 
             if detector_loaded:
                 prediction = detector.predict([feat])[0]
@@ -234,13 +238,13 @@ else:
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.markdown("### 📄 Extract")
+        st.markdown("### Extract")
         st.markdown("Automatically extract **vendor**, **date**, and **total** from scanned receipts using OCR.")
 
     with col2:
-        st.markdown("### 🔍 Detect")
+        st.markdown("### Detect")
         st.markdown("Identify **forged** or **tampered** documents using image analysis and ML-based anomaly detection.")
 
     with col3:
-        st.markdown("### 📊 Analyze")
+        st.markdown("### Analyze")
         st.markdown("Visualize **Error Level Analysis** and OCR confidence to understand document authenticity.")
