@@ -16,12 +16,25 @@ DATE_PATTERNS = [
     r"\b(20\d{2}[01]\d[0-3]\d)\b",
 ]
 
-TOTAL_PATTERNS = [
-    r"(?:total\s*rounded|grand\s*total|total\s*sales?\s*\(inclusive[^)]*\)|amount\s*due|balance\s*due|net\s*total|total\s*amount)\s*[:\s]*(?:RM|USD|\$|£|€)?\s*(\d+[.,]\d{2})\b",
-    r"(?:total)\s*[:\s]*(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})\b",
-    r"(?:total|grand\s*total|amount\s*due|balance\s*due)\s*[:\s]*(?:RM|USD|\$|£|€)?\s*(\d+[.,]\d{2})\b",
-    r"(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})\b",
-    r"\b(\d+[.,]\d{2})\s*(?:total|due|paid)\b",
+FINAL_TOTAL_KEYWORDS = [
+    r"total\s*payable",
+    r"net\s*am(?:oun)?t",
+    r"amount\s*due",
+    r"balance\s*due",
+    r"grand\s*total",
+    r"total\s*rounded",
+    r"total\s*sales?\s*\(?inclusive",
+    r"total\s*(?:\(incl|inc)",
+]
+
+GENERIC_TOTAL_RE = re.compile(r"\btotal\b", re.IGNORECASE)
+
+NOT_TOTAL_KEYWORDS = [
+    "cash", "change", "received", "tender", "rounding", "round adj",
+    "subtotal", "sub total", "sub-total",
+    "gst", "tax", "discount", "saving", "service",
+    "total 0%", "total 6%", "total sr", "total zr",
+    "supplies (excl", "supplies(excl",
 ]
 
 SKIP_KEYWORDS = {
@@ -68,25 +81,72 @@ def extract_date(text: str) -> str | None:
     return None
 
 
+def _find_amount_in_line(line: str) -> str | None:
+    m = re.search(r"(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})", line, re.IGNORECASE)
+    if m:
+        try:
+            return f"{float(m.group(1).replace(',', '.')):.2f}"
+        except ValueError:
+            pass
+    amounts = re.findall(r"\b(\d+[.,]\d{2})\b", line)
+    if amounts:
+        try:
+            return f"{float(amounts[-1].replace(',', '.')):.2f}"
+        except ValueError:
+            pass
+    m2 = re.search(r"(?:RM|USD|\$|£|€)\s*(\d+)", line, re.IGNORECASE)
+    if m2:
+        try:
+            val = float(m2.group(1))
+            if val >= 1:
+                return f"{val:.2f}"
+        except ValueError:
+            pass
+    return None
+
+
 def extract_total(text: str) -> str | None:
-    candidates: list[tuple[float, str]] = []
-    
-    for priority, pattern in enumerate(TOTAL_PATTERNS):
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        for match in matches:
-            clean = match.replace(",", ".")
+    lines = text.strip().split("\n")
+
+    for kw_pattern in FINAL_TOTAL_KEYWORDS:
+        for i, line in enumerate(lines):
+            if re.search(kw_pattern, line, re.IGNORECASE):
+                amt = _find_amount_in_line(line)
+                if amt:
+                    return amt
+                if i + 1 < len(lines):
+                    amt = _find_amount_in_line(lines[i + 1])
+                    if amt:
+                        return amt
+
+    for i in range(len(lines) - 1, -1, -1):
+        line = lines[i]
+        lower = line.lower()
+
+        if not GENERIC_TOTAL_RE.search(line):
+            continue
+
+        if any(excl in lower for excl in NOT_TOTAL_KEYWORDS):
+            continue
+
+        amt = _find_amount_in_line(line)
+        if amt:
+            return amt
+        if i + 1 < len(lines):
+            amt = _find_amount_in_line(lines[i + 1])
+            if amt:
+                return amt
+
+    currency_amounts = re.findall(r"(?:RM|USD|\$|£|€)\s*(\d+[.,]\d{2})", text, re.IGNORECASE)
+    if currency_amounts:
+        values = []
+        for amt in currency_amounts:
             try:
-                value = float(clean)
-                if 0.01 <= value <= 99999.99:
-                    candidates.append((priority, f"{value:.2f}"))
+                values.append(float(amt.replace(",", ".")))
             except ValueError:
                 continue
-
-    if candidates:
-        best_priority = min(c[0] for c in candidates)
-        top_candidates = [c for c in candidates if c[0] == best_priority]
-        top_candidates.sort(key=lambda x: float(x[1]), reverse=True)
-        return top_candidates[0][1]
+        if values:
+            return f"{max(values):.2f}"
 
     all_amounts = re.findall(r"\b(\d+[.,]\d{2})\b", text)
     if all_amounts:

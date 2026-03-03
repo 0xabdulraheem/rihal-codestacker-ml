@@ -103,10 +103,10 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### About")
     st.markdown("**DocFusion** analyzes scanned receipts to extract structured data and detect potential forgeries using OCR + ML.")
-    st.markdown("Built for **Rihal CodeStacker 2026**")
+    st.markdown("Built for **Rihal CodeStacker 2026 ML challenge**")
 
 st.markdown('<div class="main-header">DocFusion</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">Intelligent Document Analysis & Forgery Detection</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Intelligent Document Analysis and Forgery Detection</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader(
     "Upload a receipt image",
