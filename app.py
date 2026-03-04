@@ -20,6 +20,7 @@ from src.anomaly import AnomalyDetector, build_feature_vector
 from src.extraction import extract_fields
 from src.ocr import OCREngine
 from src.preprocessing import error_level_analysis, load_image
+from src.summarizer import generate_anomaly_summary
 
 st.set_page_config(
     page_title="DocFusion",
@@ -31,43 +32,56 @@ st.set_page_config(
 st.markdown("""
 <style>
     [data-testid="stDeployButton"] { display: none; }
+    footer { visibility: hidden; }
     .main-header {
-        font-size: 2.2rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #1a73e8, #4285f4);
+        font-size: 2.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #1a73e8, #4285f4, #1a73e8);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
+        letter-spacing: -0.5px;
     }
     .sub-header {
         color: #5f6368;
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
+        font-size: 1.05rem;
+        margin-bottom: 1.5rem;
+        font-weight: 400;
     }
     .status-genuine {
         background-color: #e6f4ea;
         color: #137333;
-        padding: 0.8rem 1.2rem;
-        border-radius: 8px;
-        border-left: 4px solid #34a853;
+        padding: 1rem 1.4rem;
+        border-radius: 10px;
+        border-left: 5px solid #34a853;
         font-weight: 600;
         font-size: 1.1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     .status-forged {
         background-color: #fce8e6;
         color: #c5221f;
-        padding: 0.8rem 1.2rem;
-        border-radius: 8px;
-        border-left: 4px solid #ea4335;
+        padding: 1rem 1.4rem;
+        border-radius: 10px;
+        border-left: 5px solid #ea4335;
         font-weight: 600;
         font-size: 1.1rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
-    .field-card {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 1rem;
-        margin: 0.5rem 0;
+    [data-testid="stMetric"] {
+        background: linear-gradient(135deg, #f8f9fa, #ffffff);
         border: 1px solid #e8eaed;
+        border-radius: 10px;
+        padding: 0.8rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    [data-testid="stExpander"] {
+        border: 1px solid #e8eaed;
+        border-radius: 10px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .stFileUploader > div {
+        border-radius: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -213,6 +227,10 @@ if uploaded_file is not None:
                         f'<div class="status-genuine">GENUINE — Forgery probability: {proba:.1%}</div>',
                         unsafe_allow_html=True,
                     )
+
+                summary = generate_anomaly_summary(fields, feat, prediction, proba)
+                with st.expander("Anomaly Summary"):
+                    st.text(summary)
 
                 with st.expander("Feature Details"):
                     feat_df = {k: f"{v:.4f}" for k, v in sorted(feat.items())}

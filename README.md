@@ -95,7 +95,8 @@ Regex-based extraction of `vendor`, `date`, `total` from OCR text with fallback 
 
 ### Bonus
 - **Dockerfile** for containerized deployment
-- **Cloud-ready** Streamlit app
+- **Cloud deployment** via Streamlit Community Cloud
+- **Intelligent anomaly summaries** — human-readable forensic explanations generated for each analysis
 
 ## Docker
 
@@ -103,6 +104,19 @@ Regex-based extraction of `vendor`, `date`, `total` from OCR text with fallback 
 docker build -t docfusion .
 docker run -p 8501:8501 docfusion
 ```
+
+## Cloud Deployment
+
+The app is deployed on Streamlit Community Cloud:
+
+> **[Live Demo](https://docfusion-rihal.streamlit.app)**
+
+To deploy your own instance:
+1. Fork the repository
+2. Go to [share.streamlit.io](https://share.streamlit.io)
+3. Connect your GitHub account
+4. Select the repository and `app.py` as the main file
+5. Deploy
 
 ## Project Structure
 
