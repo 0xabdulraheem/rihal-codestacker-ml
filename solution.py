@@ -41,8 +41,8 @@ class DocFusionSolution:
             if not os.path.exists(image_path):
                 image_path = None
 
-            gt_fields = rec.get("fields", {})
             ocr_text = ""
+            ocr_results = []
             if image_path:
                 try:
                     ocr_results = self.ocr.extract_text(image_path)
@@ -52,7 +52,8 @@ class DocFusionSolution:
                 except Exception:
                     pass
 
-            feat = build_feature_vector(image_path, gt_fields, ocr_text)
+            fields = extract_fields(ocr_text, ocr_results)
+            feat = build_feature_vector(image_path, fields, ocr_text)
             features_list.append(feat)
 
             label_info = rec.get("label", {})
@@ -66,10 +67,9 @@ class DocFusionSolution:
 
     def predict(self, model_dir: str, data_dir: str, out_path: str) -> None:
         detector = AnomalyDetector()
-        try:
+        model_path = os.path.join(model_dir, "anomaly_model.joblib")
+        if os.path.exists(model_path):
             detector.load(model_dir)
-        except Exception:
-            pass
 
         test_jsonl = os.path.join(data_dir, "test.jsonl")
         records = _load_jsonl(test_jsonl)
@@ -93,16 +93,9 @@ class DocFusionSolution:
 
             fields = extract_fields(ocr_text, ocr_results)
 
-            gt_fields = rec.get("fields", {})
-            merged = {
-                "vendor": fields.get("vendor") or gt_fields.get("vendor"),
-                "date": fields.get("date") or gt_fields.get("date"),
-                "total": fields.get("total") or gt_fields.get("total"),
-            }
-
-            feat = build_feature_vector(image_path, merged, ocr_text)
+            feat = build_feature_vector(image_path, fields, ocr_text)
             features_list.append(feat)
-            extracted_fields.append(merged)
+            extracted_fields.append(fields)
 
         if features_list:
             predictions = detector.predict(features_list)
@@ -111,9 +104,9 @@ class DocFusionSolution:
 
         os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
         with open(out_path, "w") as f:
-            for rec, fields, is_forged in zip(records, extracted_fields, predictions):
+            for idx, (rec, fields, is_forged) in enumerate(zip(records, extracted_fields, predictions)):
                 prediction = {
-                    "id": rec["id"],
+                    "id": rec.get("id", f"unknown_{idx}"),
                     "vendor": fields.get("vendor"),
                     "date": fields.get("date"),
                     "total": fields.get("total"),

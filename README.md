@@ -109,7 +109,7 @@ docker run -p 8501:8501 docfusion
 
 The app is deployed on Streamlit Community Cloud:
 
-> **[Live Demo](https://docfusion-rihal.streamlit.app)**
+> **[Live Demo](https://rihal-codestacker-ml.streamlit.app)**
 
 To deploy your own instance:
 1. Fork the repository
@@ -133,7 +133,8 @@ rihal-codestacker-ml/
 │   ├── preprocessing.py
 │   ├── ocr.py
 │   ├── extraction.py
-│   └── anomaly.py
+│   ├── anomaly.py
+│   └── summarizer.py
 ├── notebooks/
 │   └── eda.ipynb
 ├── scripts/

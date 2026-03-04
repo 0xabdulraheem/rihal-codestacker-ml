@@ -230,7 +230,7 @@ if uploaded_file is not None:
 
                 summary = generate_anomaly_summary(fields, feat, prediction, proba)
                 with st.expander("Anomaly Summary"):
-                    st.text(summary)
+                    st.markdown(summary)
 
                 with st.expander("Feature Details"):
                     feat_df = {k: f"{v:.4f}" for k, v in sorted(feat.items())}
@@ -255,9 +255,15 @@ if uploaded_file is not None:
                 "vendor": fields.get("vendor"),
                 "date": fields.get("date"),
                 "total": fields.get("total"),
-                "is_forged": int(detector.predict([feat])[0]) if detector_loaded else 0,
+                "is_forged": int(prediction) if detector_loaded else 0,
             }
             st.code(json.dumps(output, indent=2), language="json")
+            st.download_button(
+                "Download Prediction JSON",
+                json.dumps(output, indent=2),
+                file_name="prediction.json",
+                mime="application/json",
+            )
 
     finally:
         os.unlink(tmp_path)

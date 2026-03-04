@@ -4,9 +4,6 @@ import re
 from datetime import datetime
 from typing import Any
 
-from rapidfuzz import fuzz
-
-
 DATE_PATTERNS = [
     r"\b(\d{4}[-/]\d{1,2}[-/]\d{1,2})\b",
     r"\b(\d{1,2}[-/]\d{1,2}[-/]\d{4})\b",

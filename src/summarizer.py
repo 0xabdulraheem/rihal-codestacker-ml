@@ -70,6 +70,20 @@ def generate_anomaly_summary(
             "that parts of the image originated from different sources."
         )
 
+    if blur_score < 50 and ela_max > 100:
+        reasons.append(
+            f"Inconsistent sharpness detected (blur score={blur_score:.0f}). "
+            "The document appears very blurry overall, but contains sharp editing "
+            "artifacts. This combination can indicate tampering on a low-quality scan."
+        )
+
+    if gradient_skew > 2.0 or gradient_skew < -1.0:
+        reasons.append(
+            f"Unusual edge distribution (gradient skew={gradient_skew:.2f}). "
+            "The distribution of edge intensities is abnormal, suggesting "
+            "unnatural transitions that may result from digital editing."
+        )
+
     if field_completeness < 0.67:
         missing = []
         if not fields.get("vendor"):

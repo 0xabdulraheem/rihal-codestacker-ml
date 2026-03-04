@@ -1,0 +1,15 @@
+.git/
+.venv/
+venv/
+tmp_work/
+data/
+llm_review/
+demo_receipts/
+__pycache__/
+*.pyc
+*.joblib
+*.zip
+*.restore
+.ipynb_checkpoints/
+.pytest_cache/
+*.egg-info/

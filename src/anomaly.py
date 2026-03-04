@@ -8,8 +8,7 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import GradientBoostingClassifier
 
 from .preprocessing import compute_image_features, load_image
 
@@ -68,9 +67,6 @@ def compute_text_features(fields: dict[str, Any], ocr_text: str) -> dict[str, fl
     return features
 
 
-FEATURE_COLUMNS: list[str] | None = None
-
-
 def build_feature_vector(
     image_path: str | None,
     fields: dict[str, Any],
@@ -96,7 +92,6 @@ class AnomalyDetector:
 
     def __init__(self):
         self.model = None
-        self.scaler = StandardScaler()
         self.feature_columns: list[str] = []
         self._fitted = False
 
@@ -109,7 +104,7 @@ class AnomalyDetector:
         self.feature_columns = sorted(df.columns.tolist())
         df = df[self.feature_columns].fillna(0.0)
 
-        X = pd.DataFrame(self.scaler.fit_transform(df.values), columns=self.feature_columns)
+        X = df
         y = np.array(labels)
 
         n_pos = int(y.sum())
@@ -136,7 +131,7 @@ class AnomalyDetector:
                 verbose=-1,
             )
             self.model.fit(X, y)
-        except ImportError:
+        except Exception:
             from sklearn.utils.class_weight import compute_sample_weight
             sample_weights = compute_sample_weight("balanced", y)
             self.model = GradientBoostingClassifier(
@@ -160,8 +155,7 @@ class AnomalyDetector:
                 df[col] = 0.0
         df = df[self.feature_columns].fillna(0.0)
 
-        X = pd.DataFrame(self.scaler.transform(df.values), columns=self.feature_columns)
-        predictions = self.model.predict(X)
+        predictions = self.model.predict(df)
         return [int(p) for p in predictions]
 
     def predict_proba(self, features_list: list[dict[str, float]]) -> list[float]:
@@ -174,21 +168,18 @@ class AnomalyDetector:
                 df[col] = 0.0
         df = df[self.feature_columns].fillna(0.0)
 
-        X = pd.DataFrame(self.scaler.transform(df.values), columns=self.feature_columns)
-        proba = self.model.predict_proba(X)
+        proba = self.model.predict_proba(df)
         return [float(p[1]) for p in proba]
 
     def save(self, model_dir: str) -> None:
         os.makedirs(model_dir, exist_ok=True)
         joblib.dump(self.model, os.path.join(model_dir, "anomaly_model.joblib"))
-        joblib.dump(self.scaler, os.path.join(model_dir, "anomaly_scaler.joblib"))
         with open(os.path.join(model_dir, "anomaly_features.json"), "w") as f:
             json.dump(self.feature_columns, f)
         self._fitted = True
 
     def load(self, model_dir: str) -> None:
         self.model = joblib.load(os.path.join(model_dir, "anomaly_model.joblib"))
-        self.scaler = joblib.load(os.path.join(model_dir, "anomaly_scaler.joblib"))
         with open(os.path.join(model_dir, "anomaly_features.json")) as f:
             self.feature_columns = json.load(f)
         self._fitted = True
