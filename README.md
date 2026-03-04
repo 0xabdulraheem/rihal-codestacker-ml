@@ -1,5 +1,12 @@
 # DocFusion: Operation Intelligent Documents
 
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?logo=python&logoColor=white)
+![LightGBM](https://img.shields.io/badge/LightGBM-Classifier-9ACD32?logo=lightgbm&logoColor=white)
+![EasyOCR](https://img.shields.io/badge/EasyOCR-Text_Recognition-FF6F00)
+![OpenCV](https://img.shields.io/badge/OpenCV-Image_Analysis-5C3EE8?logo=opencv&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Container-2496ED?logo=docker&logoColor=white)
+
 **Rihal CodeStacker 2026 — ML Challenge**
 
 An end-to-end intelligent document processing pipeline that extracts structured fields from scanned receipts and detects forged/tampered documents using OCR + ML-based anomaly detection.
