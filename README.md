@@ -4,9 +4,13 @@
 
 An end-to-end intelligent document processing pipeline that extracts structured fields from scanned receipts and detects forged/tampered documents using OCR + ML-based anomaly detection.
 
-## Demo
+## YouTube Demo
 
-> **[YouTube Demo Video](https://youtube.com/YOUR_VIDEO_LINK_HERE)**
+> **[Watch the Demo Video](https://youtube.com/YOUR_VIDEO_LINK_HERE)**
+
+## Live Application (Cloud Deployment)
+
+> **[Try it Live!](https://rihal-codestacker-ml.streamlit.app)**
 
 ## Architecture
 
@@ -104,19 +108,6 @@ Regex-based extraction of `vendor`, `date`, `total` from OCR text with fallback 
 docker build -t docfusion .
 docker run -p 8501:8501 docfusion
 ```
-
-## Cloud Deployment
-
-The app is deployed on Streamlit Community Cloud:
-
-> **[Live Demo](https://rihal-codestacker-ml.streamlit.app)**
-
-To deploy your own instance:
-1. Fork the repository
-2. Go to [share.streamlit.io](https://share.streamlit.io)
-3. Connect your GitHub account
-4. Select the repository and `app.py` as the main file
-5. Deploy
 
 ## Project Structure
 
