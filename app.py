@@ -69,11 +69,20 @@ st.markdown("""
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
     [data-testid="stMetric"] {
-        background: linear-gradient(135deg, #f8f9fa, #ffffff);
-        border: 1px solid #e8eaed;
+        border: 1px solid rgba(128,128,128,0.3);
         border-radius: 10px;
         padding: 0.8rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        background-color: #f8f9fa;
+        color: #1a1a1a;
+    }
+    [data-testid="stMetric"] [data-testid="stMetricLabel"] {
+        color: #5f6368;
+    }
+    [data-testid="stMetric"] [data-testid="stMetricValue"] {
+        color: #1a1a1a;
+    }
+    .status-genuine, .status-forged {
+        margin-bottom: 1rem;
     }
     [data-testid="stExpander"] {
         border: 1px solid #e8eaed;
@@ -98,13 +107,13 @@ def load_ocr_engine():
 @st.cache_resource
 def load_detector():
     detector = AnomalyDetector()
-    model_dir = _ROOT / "tmp_work" / "model"
-    if model_dir.exists():
-        try:
-            detector.load(str(model_dir))
-            return detector, True
-        except Exception:
-            pass
+    for model_dir in [_ROOT / "models", _ROOT / "tmp_work" / "model"]:
+        if (model_dir / "anomaly_model.joblib").exists():
+            try:
+                detector.load(str(model_dir))
+                return detector, True
+            except Exception:
+                continue
     return detector, False
 
 with st.sidebar:

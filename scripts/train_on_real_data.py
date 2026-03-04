@@ -15,6 +15,7 @@ from src.extraction import extract_fields
 
 UNIFIED_DIR = ROOT / "data" / "unified"
 MODEL_DIR = ROOT / "tmp_work" / "model"
+GIT_MODEL_DIR = ROOT / "models"
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -87,6 +88,10 @@ def main():
     os.makedirs(MODEL_DIR, exist_ok=True)
     detector.save(str(MODEL_DIR))
     print(f"Model saved to: {MODEL_DIR}")
+
+    os.makedirs(GIT_MODEL_DIR, exist_ok=True)
+    detector.save(str(GIT_MODEL_DIR))
+    print(f"Model saved to: {GIT_MODEL_DIR} (git-tracked, for Streamlit Cloud)")
 
     print("\nQuick validation on training data...")
     predictions = detector.predict(features_list)

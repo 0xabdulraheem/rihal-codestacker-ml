@@ -18,6 +18,8 @@ data/
 *.pth
 *.pkl
 *.joblib
+!models/
+!models/**
 model_artifacts/
 *.zip
 *.restore
