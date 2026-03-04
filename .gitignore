@@ -21,6 +21,7 @@ data/
 model_artifacts/
 *.zip
 *.restore
+llm_review/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
