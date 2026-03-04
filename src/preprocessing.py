@@ -163,8 +163,17 @@ def compute_image_features(img: np.ndarray) -> dict:
         features["ela_lo_mean"] = 0.0
         features["ela_diff_mean"] = 0.0
 
+    f = np.fft.fft2(gray.astype(float))
+    fshift = np.fft.fftshift(f)
+    magnitude = 20 * np.log1p(np.abs(fshift))
+    fh, fw = magnitude.shape
+    center_energy = float(np.mean(magnitude[fh // 4:3 * fh // 4, fw // 4:3 * fw // 4]))
+    total_energy = float(np.mean(magnitude))
+    features["fft_center_energy"] = center_energy
+    features["fft_edge_ratio"] = float((total_energy - center_energy) / (center_energy + 1e-6))
+
     if len(img.shape) == 3:
-        for i, channel in enumerate(["b", "c_g", "r"]):
+        for i, channel in enumerate(["b", "g", "r"]):
             ch = img[:, :, i]
             features[f"{channel}_mean"] = float(np.mean(ch))
             features[f"{channel}_std"] = float(np.std(ch))
@@ -231,7 +240,7 @@ def _color_patch_features(img: np.ndarray, grid: tuple = (4, 4)) -> dict:
                     channel_patch_means[ch].append(float(np.mean(patch[:, :, ch])))
 
     features = {}
-    for ch, name in enumerate(["b", "c_g", "r"]):
+    for ch, name in enumerate(["b", "g", "r"]):
         vals = np.array(channel_patch_means[ch])
         if len(vals) > 1:
             features[f"{name}_patch_std"] = float(np.std(vals))

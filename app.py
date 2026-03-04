@@ -211,7 +211,8 @@ if uploaded_file is not None:
             st.markdown("#### Forgery Analysis")
 
             detector, detector_loaded = load_detector()
-            feat = build_feature_vector(tmp_path, fields, full_ocr_text)
+            with st.spinner("Analyzing image forensics..."):
+                feat = build_feature_vector(tmp_path, fields, full_ocr_text)
 
             if detector_loaded:
                 prediction = detector.predict([feat])[0]

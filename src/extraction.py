@@ -61,7 +61,7 @@ def normalize_date(raw: str) -> str | None:
             dt = datetime.strptime(raw, fmt)
             if dt.year < 100:
                 dt = dt.replace(year=dt.year + 2000)
-            if 2000 <= dt.year <= 2030:
+            if 2000 <= dt.year <= 2040:
                 return dt.strftime("%Y-%m-%d")
         except ValueError:
             continue
