@@ -13,7 +13,7 @@ An end-to-end intelligent document processing pipeline that extracts structured 
 
 ## YouTube Demo
 
-> **[Watch the Demo Video](https://youtube.com/YOUR_VIDEO_LINK_HERE)**
+> **[Watch the Demo Video](https://youtu.be/A6xtPxvngGU)**
 
 ## Cloud Deployment
 
